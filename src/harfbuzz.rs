@@ -356,6 +356,10 @@ impl HBFace {
             positions.push(HBGlyphPosition::new(pos));
         }
 
+        unsafe {
+            harfbuzz_sys::hb_buffer_destroy(buffer);
+        }
+
         HBGlyphPositions::new(positions)
 
     }
