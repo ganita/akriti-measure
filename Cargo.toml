@@ -1,0 +1,11 @@
+[package]
+name = "akriti-measure"
+version = "0.1.0"
+authors = ["Sreejith Krishnan R <sreejith@ganita.io>"]
+
+[dependencies]
+harfbuzz-sys = { path="../rust-harfbuzz/harfbuzz" }
+
+[dev-dependencies]
+core-foundation = "*"
+freetype-sys = { path="../freetype/" }
