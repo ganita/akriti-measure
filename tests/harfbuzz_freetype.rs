@@ -61,6 +61,13 @@ fn it_opens_freetype_font() {
     assert_eq!(parts[2].is_extender(), false);
 
     assert_eq!(face.glyph_assembly(face.glyph_index('a' as u32).unwrap(), HBDirection::TTB).len(), 0);
+
+    assert_eq!(face.ascent(), 768);
+    assert_eq!(face.descent(), -256);
+
+    let positions = face.measure(String::from("Test"), &HBDirection::LTR);
+    assert_eq!(positions.width(), 1638);
+    assert_eq!(positions.height(), 0);
 }
 
 #[test]

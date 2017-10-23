@@ -1,6 +1,7 @@
-use std::ffi::{CStr};
+use std::ffi::{CStr, CString};
 use std::ptr;
 use std::cmp::PartialEq;
+use std::slice;
 
 use ::harfbuzz_sys;
 
@@ -175,6 +176,74 @@ impl HBGlyphAssembly {
     }
 }
 
+#[derive(Debug)]
+pub struct HBGlyphPosition {
+    x_advance: i32,
+    y_advance: i32,
+    x_offset: i32,
+    y_offset: i32,
+}
+
+impl HBGlyphPosition {
+    fn new(data: &harfbuzz_sys::hb_glyph_position_t) -> HBGlyphPosition {
+        HBGlyphPosition {
+            x_advance: data.x_advance,
+            y_advance: data.y_advance,
+            x_offset: data.x_offset,
+            y_offset: data.y_offset
+        }
+    }
+
+    pub fn x_advance(&self) -> i32 {
+        self.x_advance
+    }
+
+    pub fn y_advance(&self) -> i32 {
+        self.y_advance
+    }
+
+    pub fn x_offset(&self) -> i32 {
+        self.x_offset
+    }
+
+    pub fn y_offset(&self) -> i32 {
+        self.y_offset
+    }
+}
+
+#[derive(Debug)]
+pub struct HBGlyphPositions {
+    positions: Vec<HBGlyphPosition>,
+    width: i32,
+    height: i32,
+}
+
+impl HBGlyphPositions {
+    fn new(positions: Vec<HBGlyphPosition>) -> HBGlyphPositions {
+        let mut width = 0;
+        let mut height = 0;
+        for pos in &positions {
+            width += pos.x_advance();
+            height += pos.y_advance();
+        }
+        width += positions[positions.len()-1].x_offset();
+        height += positions[positions.len()-1].y_offset();
+        HBGlyphPositions { positions, width, height }
+    }
+
+    pub fn width(&self) -> i32 {
+        self.width
+    }
+
+    pub fn height(&self) -> i32 {
+        self.height
+    }
+
+    pub fn positions(&self) -> &Vec<HBGlyphPosition> {
+        &self.positions
+    }
+}
+
 impl HBFace {
 
     #[cfg(any(target_os="ios", target_os="macos"))]
@@ -225,6 +294,70 @@ impl HBFace {
             }
             return None
         }
+    }
+
+    pub fn ascent(&self) -> i32 {
+        self.extends().ascender
+    }
+
+    pub fn descent(&self) -> i32 {
+        self.extends().descender
+    }
+
+    fn extends(&self) -> harfbuzz_sys::hb_font_extents_t {
+        let mut extends = harfbuzz_sys::hb_font_extents_t {
+            ascender: 0,
+            descender: 0,
+            line_gap: 0,
+            reserved1: 0,
+            reserved2: 0,
+            reserved3: 0,
+            reserved4: 0,
+            reserved5: 0,
+            reserved6: 0,
+            reserved7: 0,
+            reserved8: 0,
+            reserved9: 0,
+        };
+        unsafe {
+            harfbuzz_sys::hb_font_get_h_extents(
+                self.font,
+                &mut extends
+            );
+        };
+
+        return extends;
+    }
+
+    pub fn measure(&self, text: String, direction: &HBDirection) -> HBGlyphPositions {
+        let char_len = text.chars().count() as  i32;
+        let c_str = CString::new(text).unwrap();
+        let buffer = unsafe { harfbuzz_sys::hb_buffer_create() };
+        let hb_dir = direction.to_hb_dir();
+        unsafe {
+            harfbuzz_sys::hb_buffer_set_direction(buffer, hb_dir);
+            harfbuzz_sys::hb_buffer_add_utf8(
+                buffer,
+                c_str.as_ptr(),
+                char_len,
+                0,
+                char_len
+            );
+            harfbuzz_sys::hb_shape(self.font, buffer, ptr::null_mut(), 0);
+        }
+
+        let mut num_glyphs: u32 = 0;
+        let glyph_positions = unsafe { harfbuzz_sys::hb_buffer_get_glyph_positions(buffer, &mut num_glyphs) };
+
+        let glyph_positions = unsafe { slice::from_raw_parts(glyph_positions, num_glyphs as usize) };
+
+        let mut positions = Vec::with_capacity(glyph_positions.len());
+        for pos in glyph_positions {
+            positions.push(HBGlyphPosition::new(pos));
+        }
+
+        HBGlyphPositions::new(positions)
+
     }
 
     pub fn has_ot_math_table(&self) -> bool {
