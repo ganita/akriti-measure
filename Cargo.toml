@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Sreejith Krishnan R <sreejith@ganita.io>"]
 
 [dependencies]
-harfbuzz-sys = { path="../rust-harfbuzz/harfbuzz" }
+harfbuzz-sys = { git="https://github.com/ganita/rust-harfbuzz-sys" }
 
 [dev-dependencies]
 core-foundation = "*"
-freetype-sys = { path="../freetype/" }
+freetype-sys = { git="https://github.com/ganita/rust-freetype-sys" }
