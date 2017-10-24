@@ -1,3 +1,5 @@
+// Copyright 2017 Sreejith Krishnan R <sreejith@ganita.io>
+
 extern crate akriti_measure;
 extern crate freetype_sys;
 

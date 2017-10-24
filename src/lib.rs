@@ -1,3 +1,5 @@
+// Copyright 2017 Sreejith Krishnan R <sreejith@ganita.io>
+
 extern crate harfbuzz_sys;
 
 pub mod harfbuzz;

@@ -1,7 +1,10 @@
+# Copyright 2017 Sreejith Krishnan R <sreejith@ganita.io>
+
 [package]
 name = "akriti-measure"
 version = "0.1.0"
 authors = ["Sreejith Krishnan R <sreejith@ganita.io>"]
+publish = false
 
 [dependencies]
 harfbuzz-sys = { git="https://github.com/ganita/rust-harfbuzz-sys" }
