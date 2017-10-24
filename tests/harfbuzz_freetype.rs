@@ -83,13 +83,13 @@ fn open_ft_font(name: &str) -> freetype_sys::FT_Face {
     unsafe {
         let mut library = ptr::null_mut();
         let error = freetype_sys::FT_Init_FreeType(&mut library);
-        assert!(error == (freetype_sys::FT_Err_Ok as i32));
+        assert_eq!(error, (freetype_sys::FT_Err_Ok as i32));
         let mut face = ptr::null_mut();
         let path = ffi::CString::new(format!("{}/tests/fonts/{}", env!("CARGO_MANIFEST_DIR"), name)).unwrap();
         let error = freetype_sys::FT_New_Face(library, path.as_ptr(), 0, &mut face);
-        assert!(error == (freetype_sys::FT_Err_Ok as i32));
+        assert_eq!(error, (freetype_sys::FT_Err_Ok as i32));
         let error = freetype_sys::FT_Set_Pixel_Sizes(face, 0, 15);
-        assert!(error == (freetype_sys::FT_Err_Ok as i32));
+        assert_eq!(error, (freetype_sys::FT_Err_Ok as i32));
         return face;
     }
 }
