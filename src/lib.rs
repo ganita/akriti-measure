@@ -16,8 +16,10 @@
 
 
 extern crate harfbuzz_sys;
+extern crate freetype_sys;
 
 pub mod harfbuzz;
+pub mod freetype;
 
 #[cfg(test)]
 mod tests {
